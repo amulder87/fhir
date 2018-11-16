@@ -1,2 +1,5 @@
 # Ignore the bazel symlinks
 /bazel-*
+
+# Ignore IntelliJ + Bazel project files
+.ijwb/
