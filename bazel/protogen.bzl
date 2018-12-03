@@ -42,7 +42,7 @@ def gen_fhir_protos(
         name,
         package,
         package_deps = [],
-        additional_proto_imports = [],
+        additional_proto_imports = None,
         separate_extensions = False,
         add_apache_license = False):
     """Generates a proto file from a structure_definition_package
@@ -70,6 +70,16 @@ def gen_fhir_protos(
         (_get_zip_for_pkg(dep), _get_package_info_for_pkg(dep))
         for dep in all_struct_def_pkgs
     ])
+    if not additional_proto_imports:
+        additional_proto_imports = []
+    if separate_extensions:
+        # Also add the extensions proto files as an import to the main file.
+        # Unfortunately we don't have an easy way to get the directory that
+        # a genrule runs out of, but it's pretty easy to deduce from the output
+        # directory - we just cut off everything up to and including "genfiles/"
+        src_dir = "$$(GENDIR=$(@D) && echo $${GENDIR##*genfiles/})"
+        additional_proto_imports += [src_dir + "/" + name + "_extensions.proto"]
+
     additional_proto_imports_flags = " ".join([
         "--additional_import %s" % proto_import
         for proto_import in additional_proto_imports
